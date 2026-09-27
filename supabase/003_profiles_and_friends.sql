@@ -76,7 +76,7 @@ begin
   update public.ordo_friend_requests set status=case when p_accept then 'accepted' else 'rejected' end,
     updated_at=now()
     where id=p_request_id and (user_a=caller or user_b=caller)
-      and requested_by <> caller and status='pending'
+      and (not p_accept or requested_by <> caller) and status='pending'
     returning status into result;
   if result is null then raise exception 'Friend request not found'; end if;
   return result;
