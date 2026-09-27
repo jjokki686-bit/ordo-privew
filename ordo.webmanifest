@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "오르도",
+  "short_name": "ordo",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f4ef",
+  "theme_color": "#11130f",
+  "icons": [
+    {
+      "src": "./ordo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
