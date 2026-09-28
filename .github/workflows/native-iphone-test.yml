@@ -1,0 +1,44 @@
+name: Native iPhone test IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack native app source
+        run: unzip -q ordo-native-test-source.zip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: ordo-native-test/package-lock.json
+      - name: Install and verify
+        working-directory: ordo-native-test
+        run: npm ci && npm run build && npm run check && npx cap sync ios
+      - name: Compile device app without signing
+        working-directory: ordo-native-test
+        run: >-
+          xcodebuild
+          -project ios/App/App.xcodeproj
+          -scheme App
+          -configuration Debug
+          -sdk iphoneos
+          -destination 'generic/platform=iOS'
+          -derivedDataPath build/DerivedData
+          CODE_SIGNING_ALLOWED=NO
+          build
+      - name: Package unsigned IPA
+        working-directory: ordo-native-test
+        run: |
+          mkdir -p build/ipa/Payload
+          cp -R build/DerivedData/Build/Products/Debug-iphoneos/App.app build/ipa/Payload/
+          cd build/ipa
+          zip -qry ../Ordo-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ordo-unsigned-ipa
+          path: ordo-native-test/build/Ordo-unsigned.ipa
+          if-no-files-found: error
